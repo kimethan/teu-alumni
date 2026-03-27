@@ -14,7 +14,161 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      access_codes: {
+        Row: {
+          alumni_name: string | null
+          code: string
+          created_at: string
+          id: string
+          is_used: boolean
+        }
+        Insert: {
+          alumni_name?: string | null
+          code: string
+          created_at?: string
+          id?: string
+          is_used?: boolean
+        }
+        Update: {
+          alumni_name?: string | null
+          code?: string
+          created_at?: string
+          id?: string
+          is_used?: boolean
+        }
+        Relationships: []
+      }
+      alumni_profiles: {
+        Row: {
+          access_code: string | null
+          cohort: string
+          company: string | null
+          contribute: string | null
+          created_at: string
+          email: string | null
+          full_name: string
+          gain: string | null
+          id: string
+          interests: string | null
+          nickname: string | null
+          photo_url: string | null
+          sns: string | null
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          access_code?: string | null
+          cohort?: string
+          company?: string | null
+          contribute?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          gain?: string | null
+          id?: string
+          interests?: string | null
+          nickname?: string | null
+          photo_url?: string | null
+          sns?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          access_code?: string | null
+          cohort?: string
+          company?: string | null
+          contribute?: string | null
+          created_at?: string
+          email?: string | null
+          full_name?: string
+          gain?: string | null
+          id?: string
+          interests?: string | null
+          nickname?: string | null
+          photo_url?: string | null
+          sns?: string | null
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "alumni_profiles_access_code_fkey"
+            columns: ["access_code"]
+            isOneToOne: false
+            referencedRelation: "access_codes"
+            referencedColumns: ["code"]
+          },
+        ]
+      }
+      messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_read: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          receiver_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          receiver_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "messages_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "alumni_profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "alumni_profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      site_content: {
+        Row: {
+          content: string | null
+          id: string
+          image_url: string | null
+          section_key: string
+          title: string | null
+          updated_at: string
+        }
+        Insert: {
+          content?: string | null
+          id?: string
+          image_url?: string | null
+          section_key: string
+          title?: string | null
+          updated_at?: string
+        }
+        Update: {
+          content?: string | null
+          id?: string
+          image_url?: string | null
+          section_key?: string
+          title?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
