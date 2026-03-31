@@ -13,6 +13,7 @@ export default function Navbar() {
     { to: '/', label: '홈' },
     { to: '/directory', label: '디렉토리' },
     { to: '/network', label: '네트워크 그래프' },
+    { to: '/news', label: '뉴스' },
   ];
 
   if (isLoggedIn && !isAdmin) {

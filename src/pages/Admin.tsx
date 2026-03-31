@@ -193,6 +193,7 @@ export default function Admin() {
 
           {/* Access Codes Tab */}
           <TabsContent value="codes" className="mt-6 space-y-6">
+            <CsvUpload onComplete={loadData} />
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">접속 코드 생성</CardTitle>
