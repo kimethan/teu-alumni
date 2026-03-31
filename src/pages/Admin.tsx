@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { Download, RefreshCw, Edit2, Save, Plus } from 'lucide-react';
+import { Download, RefreshCw, Edit2, Save, Plus, Trash2, KeyRound } from 'lucide-react';
 import CsvUpload from '@/components/admin/CsvUpload';
 
 function generateCode(): string {
@@ -51,18 +51,17 @@ export default function Admin() {
     if (s) setSiteContent(s as any[]);
   };
 
-  const handleGenerateCode = async () => {
-    // Fetch existing codes to ensure uniqueness
+  const generateUniqueCode = async (): Promise<string> => {
     const { data: existingCodes } = await supabase.from('access_codes').select('code');
     const usedCodes = new Set((existingCodes || []).map(c => c.code));
-    
     let code = generateCode();
     let attempts = 0;
-    while (usedCodes.has(code) && attempts < 100) {
-      code = generateCode();
-      attempts++;
-    }
-    
+    while (usedCodes.has(code) && attempts < 100) { code = generateCode(); attempts++; }
+    return code;
+  };
+
+  const handleGenerateCode = async () => {
+    const code = await generateUniqueCode();
     const { error } = await supabase.from('access_codes').insert({
       code,
       alumni_name: newCodeName.trim() || null,
@@ -74,6 +73,56 @@ export default function Admin() {
       setNewCodeName('');
       loadData();
     }
+  };
+
+  const handleDeleteCode = async (codeEntry: typeof codes[0]) => {
+    // Delete associated profile first
+    if (codeEntry.is_used) {
+      await supabase.from('alumni_profiles').delete().eq('access_code', codeEntry.code);
+    }
+    const { error } = await supabase.from('access_codes').delete().eq('id', codeEntry.id);
+    if (error) {
+      toast({ title: '오류', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: '코드 삭제 완료' });
+      loadData();
+    }
+  };
+
+  const handleReissueCode = async (codeEntry: typeof codes[0]) => {
+    const newCode = await generateUniqueCode();
+    // Update access_codes table
+    const { error: codeErr } = await supabase.from('access_codes').update({ code: newCode, is_used: false }).eq('id', codeEntry.id);
+    if (codeErr) {
+      toast({ title: '오류', description: codeErr.message, variant: 'destructive' });
+      return;
+    }
+    // Update linked profile if exists
+    await supabase.from('alumni_profiles').update({ access_code: newCode }).eq('access_code', codeEntry.code);
+    toast({ title: '코드 재발행 완료', description: newCode });
+    loadData();
+  };
+
+  const [showNewProfile, setShowNewProfile] = useState(false);
+  const [newProfileForm, setNewProfileForm] = useState({
+    full_name: '', nickname: '', cohort: 'TEU 1', company: '', title: '',
+    interests: '', contribute: '', gain: '', sns: '', email: '',
+  });
+
+  const handleCreateProfile = async () => {
+    if (!newProfileForm.full_name.trim()) {
+      toast({ title: '오류', description: '이름을 입력해주세요.', variant: 'destructive' });
+      return;
+    }
+    const code = await generateUniqueCode();
+    const { error: codeErr } = await supabase.from('access_codes').insert({ code, alumni_name: newProfileForm.full_name });
+    if (codeErr) { toast({ title: '오류', description: codeErr.message, variant: 'destructive' }); return; }
+    const { error: profileErr } = await supabase.from('alumni_profiles').insert({ ...newProfileForm, access_code: code });
+    if (profileErr) { toast({ title: '오류', description: profileErr.message, variant: 'destructive' }); return; }
+    toast({ title: '프로필 생성 완료', description: `접속코드: ${code}` });
+    setNewProfileForm({ full_name: '', nickname: '', cohort: 'TEU 1', company: '', title: '', interests: '', contribute: '', gain: '', sns: '', email: '' });
+    setShowNewProfile(false);
+    loadData();
   };
 
   const openEditProfile = (p: AlumniProfile) => {
@@ -155,9 +204,14 @@ export default function Admin() {
           <TabsContent value="profiles" className="mt-6">
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-muted-foreground">총 {profiles.length}명</p>
-              <Button variant="outline" onClick={downloadExcel}>
-                <Download className="h-4 w-4 mr-2" /> 엑셀 다운로드
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowNewProfile(true)}>
+                  <Plus className="h-4 w-4 mr-2" /> 새 프로필 생성
+                </Button>
+                <Button variant="outline" onClick={downloadExcel}>
+                  <Download className="h-4 w-4 mr-2" /> 엑셀 다운로드
+                </Button>
+              </div>
             </div>
             <div className="border border-border rounded-lg overflow-x-auto">
               <Table>
@@ -217,6 +271,7 @@ export default function Admin() {
                     <TableHead>접속 코드</TableHead>
                     <TableHead>사용 여부</TableHead>
                     <TableHead>생성일</TableHead>
+                    <TableHead>관리</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -231,6 +286,16 @@ export default function Admin() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(c.created_at).toLocaleDateString('ko-KR')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => handleReissueCode(c)} title="코드 재발행">
+                            <KeyRound className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteCode(c)} title="코드 삭제">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -339,6 +404,72 @@ export default function Admin() {
             </div>
             <Button className="w-full" onClick={saveEditProfile}>
               <Save className="h-4 w-4 mr-2" /> 저장
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* New Profile Dialog */}
+      <Dialog open={showNewProfile} onOpenChange={setShowNewProfile}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>새 프로필 생성</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>이름 *</Label>
+                <Input value={newProfileForm.full_name} onChange={e => setNewProfileForm(f => ({ ...f, full_name: e.target.value }))} placeholder="홍길동" />
+              </div>
+              <div>
+                <Label>닉네임</Label>
+                <Input value={newProfileForm.nickname} onChange={e => setNewProfileForm(f => ({ ...f, nickname: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>기수</Label>
+              <Select value={newProfileForm.cohort} onValueChange={v => setNewProfileForm(f => ({ ...f, cohort: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {COHORTS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>직장/소속</Label>
+                <Input value={newProfileForm.company} onChange={e => setNewProfileForm(f => ({ ...f, company: e.target.value }))} />
+              </div>
+              <div>
+                <Label>직책</Label>
+                <Input value={newProfileForm.title} onChange={e => setNewProfileForm(f => ({ ...f, title: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>관심사</Label>
+              <Textarea value={newProfileForm.interests} onChange={e => setNewProfileForm(f => ({ ...f, interests: e.target.value }))} rows={2} />
+            </div>
+            <div>
+              <Label>기여할 수 있는 것</Label>
+              <Textarea value={newProfileForm.contribute} onChange={e => setNewProfileForm(f => ({ ...f, contribute: e.target.value }))} rows={2} />
+            </div>
+            <div>
+              <Label>얻고 싶은 것</Label>
+              <Textarea value={newProfileForm.gain} onChange={e => setNewProfileForm(f => ({ ...f, gain: e.target.value }))} rows={2} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>이메일</Label>
+                <Input value={newProfileForm.email} onChange={e => setNewProfileForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+              <div>
+                <Label>SNS</Label>
+                <Input value={newProfileForm.sns} onChange={e => setNewProfileForm(f => ({ ...f, sns: e.target.value }))} />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">접속코드는 자동으로 생성됩니다.</p>
+            <Button className="w-full" onClick={handleCreateProfile}>
+              <Plus className="h-4 w-4 mr-2" /> 프로필 생성 및 접속코드 발급
             </Button>
           </div>
         </DialogContent>
