@@ -16,7 +16,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
-import { Download, RefreshCw, Edit2, Save, Plus } from 'lucide-react';
+import { Download, RefreshCw, Edit2, Save, Plus, Trash2, KeyRound } from 'lucide-react';
 import CsvUpload from '@/components/admin/CsvUpload';
 
 function generateCode(): string {
