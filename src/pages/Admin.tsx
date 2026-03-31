@@ -52,7 +52,17 @@ export default function Admin() {
   };
 
   const handleGenerateCode = async () => {
-    const code = generateCode();
+    // Fetch existing codes to ensure uniqueness
+    const { data: existingCodes } = await supabase.from('access_codes').select('code');
+    const usedCodes = new Set((existingCodes || []).map(c => c.code));
+    
+    let code = generateCode();
+    let attempts = 0;
+    while (usedCodes.has(code) && attempts < 100) {
+      code = generateCode();
+      attempts++;
+    }
+    
     const { error } = await supabase.from('access_codes').insert({
       code,
       alumni_name: newCodeName.trim() || null,
