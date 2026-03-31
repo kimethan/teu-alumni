@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Download, RefreshCw, Edit2, Save, Plus } from 'lucide-react';
+import CsvUpload from '@/components/admin/CsvUpload';
 
 function generateCode(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
@@ -51,7 +52,17 @@ export default function Admin() {
   };
 
   const handleGenerateCode = async () => {
-    const code = generateCode();
+    // Fetch existing codes to ensure uniqueness
+    const { data: existingCodes } = await supabase.from('access_codes').select('code');
+    const usedCodes = new Set((existingCodes || []).map(c => c.code));
+    
+    let code = generateCode();
+    let attempts = 0;
+    while (usedCodes.has(code) && attempts < 100) {
+      code = generateCode();
+      attempts++;
+    }
+    
     const { error } = await supabase.from('access_codes').insert({
       code,
       alumni_name: newCodeName.trim() || null,
@@ -182,6 +193,7 @@ export default function Admin() {
 
           {/* Access Codes Tab */}
           <TabsContent value="codes" className="mt-6 space-y-6">
+            <CsvUpload onComplete={loadData} />
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg">접속 코드 생성</CardTitle>
