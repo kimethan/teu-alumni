@@ -17,6 +17,7 @@ import { Badge } from '@/components/ui/badge';
 import { toast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { Download, RefreshCw, Edit2, Save, Plus } from 'lucide-react';
+import CsvUpload from '@/components/admin/CsvUpload';
 
 function generateCode(): string {
   const chars = 'abcdefghijklmnopqrstuvwxyz0123456789';
