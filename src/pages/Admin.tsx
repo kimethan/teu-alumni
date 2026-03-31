@@ -204,9 +204,14 @@ export default function Admin() {
           <TabsContent value="profiles" className="mt-6">
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-muted-foreground">총 {profiles.length}명</p>
-              <Button variant="outline" onClick={downloadExcel}>
-                <Download className="h-4 w-4 mr-2" /> 엑셀 다운로드
-              </Button>
+              <div className="flex gap-2">
+                <Button variant="outline" onClick={() => setShowNewProfile(true)}>
+                  <Plus className="h-4 w-4 mr-2" /> 새 프로필 생성
+                </Button>
+                <Button variant="outline" onClick={downloadExcel}>
+                  <Download className="h-4 w-4 mr-2" /> 엑셀 다운로드
+                </Button>
+              </div>
             </div>
             <div className="border border-border rounded-lg overflow-x-auto">
               <Table>
