@@ -51,18 +51,17 @@ export default function Admin() {
     if (s) setSiteContent(s as any[]);
   };
 
-  const handleGenerateCode = async () => {
-    // Fetch existing codes to ensure uniqueness
+  const generateUniqueCode = async (): Promise<string> => {
     const { data: existingCodes } = await supabase.from('access_codes').select('code');
     const usedCodes = new Set((existingCodes || []).map(c => c.code));
-    
     let code = generateCode();
     let attempts = 0;
-    while (usedCodes.has(code) && attempts < 100) {
-      code = generateCode();
-      attempts++;
-    }
-    
+    while (usedCodes.has(code) && attempts < 100) { code = generateCode(); attempts++; }
+    return code;
+  };
+
+  const handleGenerateCode = async () => {
+    const code = await generateUniqueCode();
     const { error } = await supabase.from('access_codes').insert({
       code,
       alumni_name: newCodeName.trim() || null,
@@ -74,6 +73,56 @@ export default function Admin() {
       setNewCodeName('');
       loadData();
     }
+  };
+
+  const handleDeleteCode = async (codeEntry: typeof codes[0]) => {
+    // Delete associated profile first
+    if (codeEntry.is_used) {
+      await supabase.from('alumni_profiles').delete().eq('access_code', codeEntry.code);
+    }
+    const { error } = await supabase.from('access_codes').delete().eq('id', codeEntry.id);
+    if (error) {
+      toast({ title: '오류', description: error.message, variant: 'destructive' });
+    } else {
+      toast({ title: '코드 삭제 완료' });
+      loadData();
+    }
+  };
+
+  const handleReissueCode = async (codeEntry: typeof codes[0]) => {
+    const newCode = await generateUniqueCode();
+    // Update access_codes table
+    const { error: codeErr } = await supabase.from('access_codes').update({ code: newCode, is_used: false }).eq('id', codeEntry.id);
+    if (codeErr) {
+      toast({ title: '오류', description: codeErr.message, variant: 'destructive' });
+      return;
+    }
+    // Update linked profile if exists
+    await supabase.from('alumni_profiles').update({ access_code: newCode }).eq('access_code', codeEntry.code);
+    toast({ title: '코드 재발행 완료', description: newCode });
+    loadData();
+  };
+
+  const [showNewProfile, setShowNewProfile] = useState(false);
+  const [newProfileForm, setNewProfileForm] = useState({
+    full_name: '', nickname: '', cohort: 'TEU 1', company: '', title: '',
+    interests: '', contribute: '', gain: '', sns: '', email: '',
+  });
+
+  const handleCreateProfile = async () => {
+    if (!newProfileForm.full_name.trim()) {
+      toast({ title: '오류', description: '이름을 입력해주세요.', variant: 'destructive' });
+      return;
+    }
+    const code = await generateUniqueCode();
+    const { error: codeErr } = await supabase.from('access_codes').insert({ code, alumni_name: newProfileForm.full_name });
+    if (codeErr) { toast({ title: '오류', description: codeErr.message, variant: 'destructive' }); return; }
+    const { error: profileErr } = await supabase.from('alumni_profiles').insert({ ...newProfileForm, access_code: code });
+    if (profileErr) { toast({ title: '오류', description: profileErr.message, variant: 'destructive' }); return; }
+    toast({ title: '프로필 생성 완료', description: `접속코드: ${code}` });
+    setNewProfileForm({ full_name: '', nickname: '', cohort: 'TEU 1', company: '', title: '', interests: '', contribute: '', gain: '', sns: '', email: '' });
+    setShowNewProfile(false);
+    loadData();
   };
 
   const openEditProfile = (p: AlumniProfile) => {
