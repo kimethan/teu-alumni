@@ -408,6 +408,72 @@ export default function Admin() {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* New Profile Dialog */}
+      <Dialog open={showNewProfile} onOpenChange={setShowNewProfile}>
+        <DialogContent className="max-w-lg max-h-[85vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>새 프로필 생성</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>이름 *</Label>
+                <Input value={newProfileForm.full_name} onChange={e => setNewProfileForm(f => ({ ...f, full_name: e.target.value }))} placeholder="홍길동" />
+              </div>
+              <div>
+                <Label>닉네임</Label>
+                <Input value={newProfileForm.nickname} onChange={e => setNewProfileForm(f => ({ ...f, nickname: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>기수</Label>
+              <Select value={newProfileForm.cohort} onValueChange={v => setNewProfileForm(f => ({ ...f, cohort: v }))}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>
+                  {COHORTS.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>직장/소속</Label>
+                <Input value={newProfileForm.company} onChange={e => setNewProfileForm(f => ({ ...f, company: e.target.value }))} />
+              </div>
+              <div>
+                <Label>직책</Label>
+                <Input value={newProfileForm.title} onChange={e => setNewProfileForm(f => ({ ...f, title: e.target.value }))} />
+              </div>
+            </div>
+            <div>
+              <Label>관심사</Label>
+              <Textarea value={newProfileForm.interests} onChange={e => setNewProfileForm(f => ({ ...f, interests: e.target.value }))} rows={2} />
+            </div>
+            <div>
+              <Label>기여할 수 있는 것</Label>
+              <Textarea value={newProfileForm.contribute} onChange={e => setNewProfileForm(f => ({ ...f, contribute: e.target.value }))} rows={2} />
+            </div>
+            <div>
+              <Label>얻고 싶은 것</Label>
+              <Textarea value={newProfileForm.gain} onChange={e => setNewProfileForm(f => ({ ...f, gain: e.target.value }))} rows={2} />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <Label>이메일</Label>
+                <Input value={newProfileForm.email} onChange={e => setNewProfileForm(f => ({ ...f, email: e.target.value }))} />
+              </div>
+              <div>
+                <Label>SNS</Label>
+                <Input value={newProfileForm.sns} onChange={e => setNewProfileForm(f => ({ ...f, sns: e.target.value }))} />
+              </div>
+            </div>
+            <p className="text-xs text-muted-foreground">접속코드는 자동으로 생성됩니다.</p>
+            <Button className="w-full" onClick={handleCreateProfile}>
+              <Plus className="h-4 w-4 mr-2" /> 프로필 생성 및 접속코드 발급
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
