@@ -271,6 +271,7 @@ export default function Admin() {
                     <TableHead>접속 코드</TableHead>
                     <TableHead>사용 여부</TableHead>
                     <TableHead>생성일</TableHead>
+                    <TableHead>관리</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -285,6 +286,16 @@ export default function Admin() {
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground">
                         {new Date(c.created_at).toLocaleDateString('ko-KR')}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-1">
+                          <Button variant="ghost" size="sm" onClick={() => handleReissueCode(c)} title="코드 재발행">
+                            <KeyRound className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="sm" onClick={() => handleDeleteCode(c)} title="코드 삭제">
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
