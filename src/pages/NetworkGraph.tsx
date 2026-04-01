@@ -106,6 +106,7 @@ export default function NetworkGraph() {
     nodesRef.current = nodes;
     edgesRef.current = edges;
     simulatingRef.current = true;
+    tickCountRef.current = 0;
 
     // Center view
     viewRef.current = { x: 0, y: 0, scale: 1 };
