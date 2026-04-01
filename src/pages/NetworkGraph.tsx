@@ -618,13 +618,13 @@ export default function NetworkGraph() {
             </div>
 
             <div>
-              <Label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">기수</Label>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">기수</Label>
               <div className="flex flex-wrap gap-1 mt-1">
                 <Button
                   variant={cohortFilter === '전체' ? 'default' : 'outline'}
                   size="sm"
                   onClick={() => setCohortFilter('전체')}
-                  className={`text-xs h-6 px-2 ${cohortFilter === '전체' ? 'bg-white text-black' : 'bg-transparent border-neutral-700 text-neutral-400 hover:text-white hover:border-neutral-500'}`}
+                  className={`text-xs h-6 px-2 ${cohortFilter === '전체' ? '' : ''}`}
                 >
                   전체
                 </Button>
@@ -634,7 +634,7 @@ export default function NetworkGraph() {
                     variant={cohortFilter === c ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => setCohortFilter(c)}
-                    className={`text-xs h-6 px-2 ${cohortFilter === c ? 'bg-white text-black' : 'bg-transparent border-neutral-700 text-neutral-400 hover:text-white hover:border-neutral-500'}`}
+                    className="text-xs h-6 px-2"
                   >
                     {c}
                   </Button>
@@ -643,25 +643,25 @@ export default function NetworkGraph() {
             </div>
 
             <div>
-              <Label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                 유사도 임계값: {Math.round(threshold[0] * 100)}%
               </Label>
               <Slider
                 value={threshold}
                 onValueChange={setThreshold}
                 min={0} max={1} step={0.05}
-                className="mt-2 [&_[role=slider]]:bg-white [&_[role=slider]]:border-neutral-600"
+                className="mt-2"
               />
             </div>
 
             {/* Legend */}
             <div>
-              <Label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">범례</Label>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">범례</Label>
               <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1">
                 {COHORTS.map(c => (
                   <div key={c} className="flex items-center gap-1">
                     <div className="w-2 h-2 rounded-full" style={{ backgroundColor: COHORT_COLORS[c] }} />
-                    <span className="text-[10px] text-neutral-500">{c}</span>
+                    <span className="text-[10px] text-muted-foreground">{c}</span>
                   </div>
                 ))}
               </div>
@@ -669,20 +669,20 @@ export default function NetworkGraph() {
 
             {/* Selected node info */}
             {selectedNode && (
-              <div className="space-y-2 pt-2 border-t border-neutral-800">
-                <Card className="bg-neutral-900 border-neutral-800">
+              <div className="space-y-2 pt-2 border-t border-border">
+                <Card>
                   <CardContent className="p-3 flex items-center gap-3">
-                    <Avatar className="h-10 w-10 border border-neutral-700">
+                    <Avatar className="h-10 w-10 border border-border">
                       <AvatarImage src={selectedNode.photo_url || ''} />
-                      <AvatarFallback className="bg-neutral-800 text-neutral-300 text-sm">{selectedNode.full_name?.charAt(0)}</AvatarFallback>
+                      <AvatarFallback className="text-sm">{selectedNode.full_name?.charAt(0)}</AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-semibold text-sm text-white">{selectedNode.full_name}</p>
+                      <p className="font-semibold text-sm text-foreground">{selectedNode.full_name}</p>
                       <div className="flex items-center gap-1.5">
                         <Badge className="text-[10px] h-4 px-1.5" style={{ backgroundColor: COHORT_COLORS[selectedNode.cohort], color: '#000' }}>
                           {selectedNode.cohort}
                         </Badge>
-                        {selectedNode.title && <span className="text-[10px] text-neutral-500">{selectedNode.title}</span>}
+                        {selectedNode.title && <span className="text-[10px] text-muted-foreground">{selectedNode.title}</span>}
                       </div>
                     </div>
                   </CardContent>
@@ -690,17 +690,17 @@ export default function NetworkGraph() {
 
                 {relatedAlumni.length > 0 && (
                   <>
-                    <h4 className="text-xs font-semibold text-neutral-400">관련 동문 ({relatedAlumni.length})</h4>
+                    <h4 className="text-xs font-semibold text-muted-foreground">관련 동문 ({relatedAlumni.length})</h4>
                     <div className="space-y-1.5 max-h-[300px] overflow-y-auto">
                       {relatedAlumni.map(r => (
                         <div
                           key={r.profile.id}
-                          className="flex items-center gap-2 p-2 rounded-md bg-neutral-900/50 border border-neutral-800/50 cursor-pointer hover:bg-neutral-800 transition-colors"
+                          className="flex items-center gap-2 p-2 rounded-md bg-secondary/50 border border-border/50 cursor-pointer hover:bg-accent transition-colors"
                           onClick={() => setDetailProfile(r.profile)}
                         >
                           <div className="w-2 h-2 rounded-full flex-shrink-0" style={{ backgroundColor: COHORT_COLORS[r.profile.cohort] }} />
-                          <span className="text-xs text-white truncate flex-1">{r.profile.full_name}</span>
-                          <span className="text-[10px] text-neutral-500 flex-shrink-0">{Math.round(r.similarity * 100)}%</span>
+                          <span className="text-xs text-foreground truncate flex-1">{r.profile.full_name}</span>
+                          <span className="text-[10px] text-muted-foreground flex-shrink-0">{Math.round(r.similarity * 100)}%</span>
                         </div>
                       ))}
                     </div>
