@@ -130,6 +130,8 @@ export default function NetworkGraph() {
       const tc = tickCountRef.current;
       if (tc > 300) { simulatingRef.current = false; return; }
       tickCountRef.current = tc + 1;
+      const nodes = nodesRef.current;
+      const edges = edgesRef.current;
       const alpha = Math.max(0.001, 0.1 * Math.pow(0.95, tc));
 
       // Repulsion
