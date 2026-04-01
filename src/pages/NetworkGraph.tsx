@@ -439,6 +439,9 @@ export default function NetworkGraph() {
 
     if (node) {
       dragRef.current = { type: 'node', nodeId: node.id, startX: world.x, startY: world.y, startViewX: node.x, startViewY: node.y };
+      // Wake up simulation briefly when dragging a node
+      simulatingRef.current = true;
+      tickCountRef.current = Math.max(tickCountRef.current, 250); // short burst
     } else {
       dragRef.current = { type: 'pan', startX: e.clientX, startY: e.clientY, startViewX: viewRef.current.x, startViewY: viewRef.current.y };
     }
