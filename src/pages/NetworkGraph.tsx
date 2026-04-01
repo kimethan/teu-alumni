@@ -174,8 +174,11 @@ export default function NetworkGraph() {
       // Apply velocity
       nodes.forEach(n => {
         if (dragRef.current?.type === 'node' && dragRef.current.nodeId === n.id) return;
-        n.vx *= 0.85;
-        n.vy *= 0.85;
+        n.vx *= 0.8;
+        n.vy *= 0.8;
+        // Stop very small movements
+        if (Math.abs(n.vx) < 0.01) n.vx = 0;
+        if (Math.abs(n.vy) < 0.01) n.vy = 0;
         n.x += n.vx;
         n.y += n.vy;
       });
