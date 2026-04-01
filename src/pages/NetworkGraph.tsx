@@ -596,20 +596,20 @@ export default function NetworkGraph() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a]">
+    <div className="min-h-screen bg-background">
       <Navbar />
       <div className="max-w-[1800px] mx-auto px-4 py-4">
         <div className="flex flex-col lg:flex-row gap-4 h-[calc(100vh-80px)]">
-          {/* Sidebar */}
+          {/* Sidebar - white background */}
           <div className="lg:w-72 space-y-3 flex-shrink-0 overflow-y-auto pr-1">
-            <h1 className="text-xl font-bold text-white tracking-tight">네트워크 그래프</h1>
+            <h1 className="text-xl font-bold text-foreground tracking-tight">네트워크 그래프</h1>
 
             <div>
-              <Label className="text-xs font-semibold text-neutral-400 uppercase tracking-wider">검색</Label>
+              <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">검색</Label>
               <div className="relative mt-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-neutral-500" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground" />
                 <Input
-                  className="pl-9 h-8 text-sm bg-neutral-900 border-neutral-800 text-white placeholder:text-neutral-600 focus:border-neutral-600"
+                  className="pl-9 h-8 text-sm"
                   placeholder="이름 또는 닉네임..."
                   value={searchName}
                   onChange={e => setSearchName(e.target.value)}
