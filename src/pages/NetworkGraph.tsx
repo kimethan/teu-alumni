@@ -118,7 +118,6 @@ export default function NetworkGraph() {
     const canvas = canvasRef.current;
     if (!canvas) return;
     let running = true;
-    let tickCount = 0;
 
     const nodeMap = () => {
       const m = new Map<string, GNode>();
@@ -127,11 +126,11 @@ export default function NetworkGraph() {
     };
 
     const simulate = () => {
-      if (!simulatingRef.current || tickCount > 300) return;
-      tickCount++;
-      const nodes = nodesRef.current;
-      const edges = edgesRef.current;
-      const alpha = Math.max(0.001, 0.1 * Math.pow(0.99, tickCount));
+      if (!simulatingRef.current) return;
+      const tc = tickCountRef.current;
+      if (tc > 300) { simulatingRef.current = false; return; }
+      tickCountRef.current = tc + 1;
+      const alpha = Math.max(0.001, 0.1 * Math.pow(0.95, tc));
 
       // Repulsion
       for (let i = 0; i < nodes.length; i++) {
