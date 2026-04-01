@@ -55,6 +55,7 @@ export default function NetworkGraph() {
   const hoveredRef = useRef<string | null>(null);
   const selectedRef = useRef<string | null>(null);
   const simulatingRef = useRef(true);
+  const tickCountRef = useRef(0);
 
   useEffect(() => {
     supabase.from('alumni_profiles').select('*').then(({ data }) => {
